@@ -417,6 +417,7 @@ instance.prototype.crosspointConnected = function (data) {
 	self.log('debug', 'Source ' + source + ' routed to destination ' + dest + ' on level ' + level)
 
 	self.update_crosspoints(source, dest, level)
+	self.checkFeedbacks()
 }
 
 instance.prototype.ext_crosspointConnected = function (data) {
@@ -685,6 +686,57 @@ instance.prototype.setupFeedbacks = function (system) {
 		],
 	}
 
+	feedbacks['source_dest_xpt'] = {
+		type: 'boolean',
+		label: 'Verify if crosspoint is active',
+		description: 'Return the status of a certain crosspoint',
+		style: {
+			color: self.rgb(0, 0, 0),
+			bgcolor: self.rgb(255, 191, 128),
+		},
+		options: [
+			{
+				type: 'number',
+				label: 'Source',
+				id: 'source',
+				default: 1,
+				min: 1,
+			},
+			{
+				type: 'number',
+				label: 'Destination',
+				id: 'dest',
+				default: 1,
+				min: 1,
+			},
+			{
+				type: 'multiselect',
+				label: 'Levels',
+				id: 'level',
+				default: [1],
+				choices: self.levels,
+				minSelection: 1,
+			},
+		],
+		callback: function (feedback, bank) {
+						// look for this dest in route table
+						console.log('xpt feedback ' + feedback.options.dest + ':' + feedback.options.source)
+						console.log('Init boucle for, self.routeTable :' + self.routeTable)
+						for (var i = 0; i < self.routeTable.length; i++) {
+							console.log('Step i = ' + i + ', je cherche la dest dans la routeTable, self.routeTable :' + self.routeTable)
+					
+							if (self.routeTable[i].dest === feedback.options.dest) {
+								console.log('je cherche la source dans la dest selectionne, self.routeTable[i].dest :' + self.routeTable[i].dest)
+								if (self.routeTable[i].source === feedback.options.source) {
+									console.log('jai trouve cest super, self.routeTable[i].source:' + self.routeTable[i].source)
+									return true
+								}
+							}
+						}
+						return false	
+		}
+	}
+
 	self.setFeedbackDefinitions(feedbacks)
 }
 
@@ -767,6 +819,7 @@ instance.prototype.feedback = function (feedback, bank) {
 			return false
 			break
 		}
+
 	}
 }
 
